@@ -22,10 +22,10 @@ void AstarPathFinder::initGridMap(double _resolution, Vector3d global_xyz_l, Vec
     resolution = _resolution;
     inv_resolution = 1.0 / _resolution;    
 
-    data = new uint8_t[GLXYZ_SIZE];
+    data = new uint8_t[GLXYZ_SIZE];  // data是指向一段uint8_t类型数组的指针
     memset(data, 0, GLXYZ_SIZE * sizeof(uint8_t));  // 全置零
     
-    GridNodeMap = new GridNodePtr ** [GLX_SIZE];
+    GridNodeMap = new GridNodePtr ** [GLX_SIZE];  
     for(int i = 0; i < GLX_SIZE; i++){
         GridNodeMap[i] = new GridNodePtr * [GLY_SIZE];
         for(int j = 0; j < GLY_SIZE; j++){
@@ -33,7 +33,7 @@ void AstarPathFinder::initGridMap(double _resolution, Vector3d global_xyz_l, Vec
             for( int k = 0; k < GLZ_SIZE;k++){
                 Vector3i tmpIdx(i,j,k); // 初始化tmpIdx
                 Vector3d pos = gridIndex2coord(tmpIdx); //索引转地图坐标
-                GridNodeMap[i][j][k] = new GridNode(tmpIdx, pos);
+                GridNodeMap[i][j][k] = new GridNode(tmpIdx, pos);   // GridNodeMap[i][j][k]是一个指针，
             }
         }
     }
