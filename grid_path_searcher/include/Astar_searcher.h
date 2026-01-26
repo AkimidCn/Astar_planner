@@ -24,7 +24,7 @@ class AstarPathFinder
 		double gl_xu, gl_yu, gl_zu;
 
 		GridNodePtr terminatePtr;
-		std::multimap<double, GridNodePtr> openSet;
+		std::multimap<double, GridNodePtr> openSet;   // 自动排序,充当一个优先级队列。
 
 		double getHeu(GridNodePtr node1, GridNodePtr node2);
 		void AstarGetSucc(GridNodePtr currentPtr, std::vector<GridNodePtr> & neighborPtrSets, std::vector<double> & edgeCostSets);		

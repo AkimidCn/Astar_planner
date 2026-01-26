@@ -97,7 +97,7 @@ Vector3d AstarPathFinder::gridIndex2coord(const Vector3i & index)
 Vector3i AstarPathFinder::coord2gridIndex(const Vector3d & pt) 
 {
     Vector3i idx;
-    idx <<  min( max( int( (pt(0) - gl_xl) * inv_resolution), 0), GLX_SIZE - 1),
+    idx <<  min( max( int( (pt(0) - gl_xl) * inv_resolution), 0), GLX_SIZE - 1),   //gl_xl是地图最低点的x值。inv_resolution是 1/分辨率，max和min分别是防止超出地图最大和最小边界
             min( max( int( (pt(1) - gl_yl) * inv_resolution), 0), GLY_SIZE - 1),
             min( max( int( (pt(2) - gl_zl) * inv_resolution), 0), GLZ_SIZE - 1);                  
   
@@ -145,12 +145,12 @@ inline void AstarPathFinder::AstarGetSucc(GridNodePtr currentPtr, vector<GridNod
     if (currentPtr == nullptr)
         std::cout << "Error: Current pointer is null" << endl;
 
-    Eigen::Vector3i thisNode = currentPtr->index;
-    auto this_x = thisNode[0];
+    Eigen::Vector3i thisNode = currentPtr->index;   
+    auto this_x = thisNode[0];  // 取出当前节点索引
     auto this_y = thisNode[1];
     auto this_z = thisNode[2];
 
-    auto this_coord = currentPtr->coord;
+    auto this_coord = currentPtr->coord;  // 坐标
     int n_x, n_y, n_z;
     double dist;
     GridNodePtr temp_ptr = nullptr;
@@ -221,7 +221,7 @@ void AstarPathFinder::AstarGraphSearch(Vector3d start_pt, Vector3d end_pt)
     ros::Time time_1 = ros::Time::now();    
 
     //index of start_point and end_point
-    Vector3i start_idx = coord2gridIndex(start_pt);
+    Vector3i start_idx = coord2gridIndex(start_pt);  //找到该点在地图网格的索引（x，y，z）
     Vector3i end_idx   = coord2gridIndex(end_pt);
     goalIdx = end_idx;
 
@@ -251,7 +251,7 @@ void AstarPathFinder::AstarGraphSearch(Vector3d start_pt, Vector3d end_pt)
     startPtr -> id = 1; 
     startPtr -> coord = start_pt;
     openSet.insert( make_pair(startPtr -> fScore, startPtr) ); // .insert()：multimap的插入方法  ； make_pair：创建键值对，前面是键(key),后面是值(value)
-    
+                                                              // multimap 会根据key的大小进行排序
     /*
     *
     STEP 2 :  some else preparatory works which should be done before while loop
@@ -260,7 +260,7 @@ void AstarPathFinder::AstarGraphSearch(Vector3d start_pt, Vector3d end_pt)
     *
     */
     // mark start point as visited(expanded) (id 0: no operation, id: 1 in OPEN, id -1: in CLOSE )
-    GridNodeMap[start_idx[0]][start_idx[1]][start_idx[2]]->id = 1;
+    GridNodeMap[start_idx[0]][start_idx[1]][start_idx[2]]->id = 1;   // 将起点放进openlist
 
     vector<GridNodePtr> neighborPtrSets;
     vector<double> edgeCostSets;
@@ -278,7 +278,7 @@ void AstarPathFinder::AstarGraphSearch(Vector3d start_pt, Vector3d end_pt)
         *
         *
         */
-        currentPtr = openSet.begin()->second; // 通过键值对找到节点
+        currentPtr = openSet.begin()->second; // 通过键值对找到代价值最小节点
         openSet.erase(openSet.begin()); // 删除最小值
 
         GridNodeMap[currentPtr->index[0]][currentPtr->index[1]][currentPtr->index[2]]->id = -1;   // 移动到closeset
@@ -291,9 +291,9 @@ void AstarPathFinder::AstarGraphSearch(Vector3d start_pt, Vector3d end_pt)
             ROS_WARN("[A*]{sucess}  Time in A*  is %f ms, path cost if %f m", (time_2 - time_1).toSec() * 1000.0, currentPtr->gScore * resolution );            
             return;
         }
-        //get the succetion
+        //get the succetion  返回有效的邻居点（neighborPtrSets），剔除地图外、障碍物等无效点；返回到邻居的代价，如直走为1，斜着走为1.414
         AstarGetSucc(currentPtr, neighborPtrSets, edgeCostSets);  //STEP 4: finish AstarPathFinder::AstarGetSucc yourself     
-
+                                                                 
         /*
         *
         *
@@ -301,7 +301,7 @@ void AstarPathFinder::AstarGraphSearch(Vector3d start_pt, Vector3d end_pt)
         please write your code below
         *        
         */         
-        for(int i = 0; i < (int)neighborPtrSets.size(); i++){  // 遍历周围八个邻居点
+        for(int i = 0; i < (int)neighborPtrSets.size(); i++){  // 遍历周围有效邻居点
             /*
             *
             *
@@ -330,7 +330,7 @@ void AstarPathFinder::AstarGraphSearch(Vector3d start_pt, Vector3d end_pt)
                 neighborPtr->id = 1;
                 continue;
             }
-            else if(neighborPtr -> id == 1){   // 邻居点已经在openset中，需要重新计算代价f,判断是否需要更新
+            else if(neighborPtr -> id == 1){   // 邻居点已经在openset中，需要重新计算代价g,判断是否需要更新
                 /*
                 *
                 *
@@ -338,7 +338,7 @@ void AstarPathFinder::AstarGraphSearch(Vector3d start_pt, Vector3d end_pt)
                 please write your code below
                 *        
                 */
-                if (neighborPtr->gScore > currentPtr->gScore + edgeCostSets[i]) // 新的代价小则更新
+                if (neighborPtr->gScore > currentPtr->gScore + edgeCostSets[i]) // 当前节点到以查询过的邻居点的g值小于邻居点，则更新邻居
                 {
                     neighborPtr->gScore = currentPtr->gScore + edgeCostSets[i];
                     neighborPtr->fScore = neighborPtr->gScore + getHeu(neighborPtr, endPtr);

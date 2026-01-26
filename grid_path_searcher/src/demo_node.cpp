@@ -50,7 +50,7 @@ void visGridPath( vector<Vector3d> nodes, bool is_use_jps );
 void visVisitedNode( vector<Vector3d> nodes );
 void pathFinding(const Vector3d start_pt, const Vector3d target_pt);
 
-void rcvWaypointsCallback(const nav_msgs::Path & wp)
+void rcvWaypointsCallback(const nav_msgs::Path & wp)   // astar入口
 {     
     if( wp.poses[0].pose.position.z < 0.0 || _has_map == false )
         return;

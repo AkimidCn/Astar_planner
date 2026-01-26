@@ -25,7 +25,7 @@ struct GridNode
     GridNode(Eigen::Vector3i _index, Eigen::Vector3d _coord){  
 		id = 0;
 		index = _index; // 网格索引
-		coord = _coord; // 世界坐标
+		coord = _coord; // 世界坐标1
 		dir   = Eigen::Vector3i::Zero();
 
 		gScore = inf;
